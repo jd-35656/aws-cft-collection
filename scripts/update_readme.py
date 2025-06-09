@@ -61,7 +61,9 @@ def list_all_folders(root_folder_name: str) -> set[str]:
     return {p.name for p in root_path.iterdir() if p.is_dir()}
 
 
-def create_entities_map(bucket_name: str, base_branch: str) -> List[Dict[str, str]]:
+def create_entities_map(
+    bucket_name: str, base_branch: str, region: str, repository: str
+) -> List[Dict[str, str]]:
     """
     Create a list of template metadata including name, description, and S3 URL.
     """
@@ -85,8 +87,8 @@ def create_entities_map(bucket_name: str, base_branch: str) -> List[Dict[str, st
             continue
 
         url = (
-            f"https://{bucket_name}.s3.ap-south-1.amazonaws.com/"
-            f"jd-35656/{base_branch}/cfts/templates"
+            f"https://{bucket_name}.s3.{region}.amazonaws.com/"
+            f"{repository}/{base_branch}/cfts/templates"
             f"/{folder}/template.yaml"
         )
         entities_map.append(
@@ -162,15 +164,20 @@ def main() -> None:
         required=True,
         help="S3 bucket name where templates are stored",
     )
+    parser.add_argument("--region", default="ap-south-1", help="AWS region")
     parser.add_argument(
         "--branch",
         default="main",
         help="Base branch to use for S3 path generation",
     )
+    parser.add_argument("--repository", required=True, help="Name of repository")
+
     args = parser.parse_args()
 
     try:
-        entities_map = create_entities_map(args.bucket, args.branch)
+        entities_map = create_entities_map(
+            args.bucket, args.branch, args.region, args.repository
+        )
         if not entities_map:
             logger.info("No templates found to update in README.md.")
             return
