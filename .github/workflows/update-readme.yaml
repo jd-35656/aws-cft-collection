@@ -2,7 +2,7 @@ name: Update Readme Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
 
 jobs:
   update_readme:
