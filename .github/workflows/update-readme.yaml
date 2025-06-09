@@ -3,12 +3,92 @@ name: Update Readme Pipeline
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
+  update_readme_test:
+    name: Update Readme Validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Pull latest changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          echo "Current branch is: $BRANCH_NAME"
+          git pull origin "${GITHUB_REF#refs/heads/}"
+          echo "Latest changes are pulled."
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Run Update Script
+        run: |
+          python scripts/update_readme.py \
+            --readme "README.md" \
+            --bucket jd-35656-public-collections \
+            --branch test \
+            --region ap-south-1 \
+            --repository ${{ github.repository }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Prettier
+        run: npm install --global prettier
+
+      - name: Format README.md
+        run: prettier --write README.md
+
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+
+      - name: Lint README.md
+        run: markdownlint README.md
+
+      - name: Commit and push if README.md changed
+        run: |
+          git add README.md
+          if ! git diff --cached --quiet; then
+            echo "README file change detected."
+          else
+            echo "Nothing to update, already up to date."
+          fi
+
   update_readme:
     name: Update Readme
     runs-on: ubuntu-latest
-    if: github.actor != 'github-actions[bot]'
+    if: ${{ github.ref == 'refs/heads/main' && github.actor != 'github-actions[bot]' }}
 
     steps:
       - name: Checkout code
@@ -81,4 +161,6 @@ jobs:
             git commit -m "chore: Update README with new CFT links"
             git push origin "${GITHUB_REF#refs/heads/}"
             echo "README file updated."
+          else
+            echo "Nothing to push or already up to date."
           fi
