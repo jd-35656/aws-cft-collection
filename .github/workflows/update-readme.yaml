@@ -43,9 +43,11 @@ jobs:
       - name: Run Update Script
         run: |
           python scripts/update_readme.py \
-            --readme="README.md" \
-            --bucket=jd-35656-public-collections \
-            --branch=main
+            --readme "README.md" \
+            --bucket jd-35656-public-collections \
+            --branch main \
+            --region ap-south-1 \
+            --repository ${{ github.repository }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
