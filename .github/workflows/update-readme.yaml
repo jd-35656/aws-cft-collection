@@ -35,7 +35,7 @@ jobs:
       - name: Run Update Script
         run: |
           python scripts/update_readme.py \
-            --readme="README.md"
+            --readme="README.md" \
             --bucket=jd-35656-public-collections \
             --branch=main
 
