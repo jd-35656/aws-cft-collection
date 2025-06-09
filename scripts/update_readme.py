@@ -85,7 +85,7 @@ def create_entities_map(bucket_name: str, base_branch: str) -> List[Dict[str, st
             continue
 
         url = (
-            f"https://{bucket_name}.s3.amazonaws.com/"
+            f"https://{bucket_name}.s3.ap-south-1.amazonaws.com/"
             f"jd-35656/{base_branch}/cfts/templates"
             f"/{folder}/template.yaml"
         )
