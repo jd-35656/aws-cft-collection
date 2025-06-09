@@ -11,6 +11,7 @@ import os
 import zipfile
 from pathlib import Path
 
+import boto3
 from botocore.exceptions import (  # type: ignore
     BotoCoreError,
     ClientError,
@@ -66,9 +67,8 @@ def upload_to_s3(
     logger.info(f"Uploading {filename} to s3://{s3_bucket}/{key}")
 
     try:
-        pass
-        # s3 = boto3.client("s3", region_name=aws_region)
-        # s3.upload_file(str(filename), s3_bucket, key)
+        s3 = boto3.client("s3", region_name=aws_region)
+        s3.upload_file(str(filename), s3_bucket, key)
     except (NoCredentialsError, BotoCoreError, ClientError) as e:
         logger.error(f"Failed to upload {filename} to S3: {e}")
         raise

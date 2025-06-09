@@ -19,6 +19,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Pull latest changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          echo "Current branch is: $BRANCH_NAME"
+          git pull origin "${GITHUB_REF#refs/heads/}"
+          echo "Latest changes are pulled."
+
       - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
@@ -35,7 +43,7 @@ jobs:
       - name: Run Update Script
         run: |
           python scripts/update_readme.py \
-            --readme="README.md"
+            --readme="README.md" \
             --bucket=jd-35656-public-collections \
             --branch=main
 
@@ -64,13 +72,11 @@ jobs:
       - name: Lint README.md
         run: markdownlint README.md
 
-      - name: Commit README.md if changed
+      - name: Commit and push if README.md changed
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git diff --cached --quiet || {
-            git pull --rebase origin main
+          if ! git diff --cached --quiet; then
             git commit -m "chore: Update README with new CFT links"
-            git push
-          }
+            git push origin "${GITHUB_REF#refs/heads/}"
+            echo "README file updated."
+          fi
