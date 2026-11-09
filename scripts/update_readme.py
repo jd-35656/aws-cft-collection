@@ -17,7 +17,6 @@ import argparse
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List
 
 import yaml  # type: ignore
 
@@ -63,7 +62,7 @@ def list_all_folders(root_folder_name: str) -> set[str]:
 
 def create_entities_map(
     bucket_name: str, base_branch: str, region: str, repository: str
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """
     Create a list of template metadata including name, description, and S3 URL.
     """
@@ -102,7 +101,7 @@ def create_entities_map(
     return entities_map
 
 
-def generate_markdown_table(entities_map: List[Dict[str, str]]) -> str:
+def generate_markdown_table(entities_map: list[dict[str, str]]) -> str:
     """
     Generate a Markdown table from the entities map.
     """
@@ -114,7 +113,7 @@ def generate_markdown_table(entities_map: List[Dict[str, str]]) -> str:
     return header + "\n".join(rows)
 
 
-def update_readme(readme_path: Path, entities_map: List[Dict[str, str]]) -> None:
+def update_readme(readme_path: Path, entities_map: list[dict[str, str]]) -> None:
     """
     Update README.md to add or update the CFT table section between the markers.
     """
